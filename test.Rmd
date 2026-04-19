@@ -1,0 +1,83 @@
+```{r}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# Read dataset
+student <- read_csv("data/student_dataset.csv")
+
+```
+
+
+
+```{r}
+
+# Preview raw data
+head(student)
+# Check structure
+str(student)
+glimpse(student)
+names(student)
+dim(student)
+# Summary statistics
+summary(student)
+# Check missing values
+colSums(is.na(student))
+
+# Data cleaning
+student_clean <- student %>%
+  select(where(~ !all(is.na(.)))) %>%   # remove empty columns
+  drop_na() %>%                         # remove rows with NA
+  mutate(across(where(is.character), as.factor))  # convert to factor
+
+# Check cleaned data
+head(student_clean)
+str(student_clean)
+glimpse(student_clean)
+summary(student_clean)
+#  Compare before vs after
+cat("Rows before:", nrow(student), "\n")
+cat("Rows after:", nrow(student_clean), "\n")
+cat("Columns before:", ncol(student), "\n")
+cat("Columns after:", ncol(student_clean), "\n")
+# Check variable types
+sapply(student_clean, class)
+
+
+```
+
+
+```{r}
+# Numeric variables + plots
+numeric_vars <- names(student_clean)[sapply(student_clean, is.numeric)]
+numeric_vars
+
+if(length(numeric_vars) >= 1){
+  ggplot(student_clean, aes(x = .data[[numeric_vars[1]]])) +
+    geom_histogram(bins = 20) +
+    labs(title = paste("Histogram of", numeric_vars[1]))
+}
+
+if(length(numeric_vars) >= 2){
+  ggplot(student_clean, aes(x = .data[[numeric_vars[1]]], y = .data[[numeric_vars[2]]])) +
+    geom_point() +
+    labs(title = paste(numeric_vars[1], "vs", numeric_vars[2]))
+}
+```
+
+
+```{r}
+# Categorical variables + plot
+
+factor_vars <- names(student_clean)[sapply(student_clean, is.factor)]
+factor_vars
+
+if(length(factor_vars) >= 1){
+  ggplot(student_clean, aes(x = .data[[factor_vars[1]]])) +
+    geom_bar() +
+    labs(title = paste("Bar plot of", factor_vars[1])) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+```
+
