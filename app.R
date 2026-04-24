@@ -92,63 +92,48 @@ top3_low <- pm25_country %>%
 selected_countries <- bind_rows(top3_high, top3_low) %>%
   arrange(desc(avg_pm25)) %>%
   mutate(
-    country_label = paste0(country, "\nPM2.5=", round(avg_pm25, 1))
+    country_label = paste0(country, "<br>PM2.5=", round(avg_pm25, 1))
   )
 
 
 # ============================================================
-# 5. Prepare Country-Level Pollutant Profile
+# 5. Prepare Heatmap Data
 # ============================================================
 
-country_profile <- air_clean %>%
+heatmap_data <- air_clean %>%
   filter(
     country %in% selected_countries$country,
-    Pollutant %in% pollutants_all
+    Pollutant %in% other_pollutants
   ) %>%
   group_by(country, Pollutant) %>%
   summarise(
     avg_value = mean(Value, na.rm = TRUE),
     .groups = "drop"
   ) %>%
-  pivot_wider(
-    names_from = Pollutant,
-    values_from = avg_value
-  ) %>%
   left_join(
-    selected_countries %>% select(country, group, avg_pm25, country_label),
+    selected_countries %>%
+      select(country, avg_pm25, group, country_label),
     by = "country"
-  )
-
-
-# ============================================================
-# 6. Prepare Normalized Heatmap Data
-# ============================================================
-
-heatmap_data <- country_profile %>%
-  select(country, group, avg_pm25, country_label, all_of(other_pollutants)) %>%
-  pivot_longer(
-    cols = all_of(other_pollutants),
-    names_to = "Pollutant",
-    values_to = "raw_value"
   ) %>%
   group_by(Pollutant) %>%
   mutate(
-    scaled_value = ifelse(
-      max(raw_value, na.rm = TRUE) == min(raw_value, na.rm = TRUE),
+    log_value = log1p(avg_value),
+    normalized_value = ifelse(
+      max(log_value, na.rm = TRUE) == min(log_value, na.rm = TRUE),
       0.5,
-      (raw_value - min(raw_value, na.rm = TRUE)) /
-        (max(raw_value, na.rm = TRUE) - min(raw_value, na.rm = TRUE))
+      scales::rescale(log_value, to = c(0, 1))
     )
   ) %>%
   ungroup() %>%
   mutate(
     country = factor(country, levels = selected_countries$country),
-    Pollutant = factor(Pollutant, levels = rev(other_pollutants))
+    country_label = factor(country_label, levels = selected_countries$country_label),
+    Pollutant = factor(Pollutant, levels = other_pollutants)
   )
 
 
 # ============================================================
-# 7. Prepare World Map Data
+# 6. Prepare World Map Data
 # ============================================================
 
 map_points <- air_clean %>%
@@ -163,7 +148,8 @@ map_points <- air_clean %>%
     .groups = "drop"
   ) %>%
   left_join(
-    selected_countries %>% select(country, group, avg_pm25_country = avg_pm25),
+    selected_countries %>%
+      select(country, group, avg_pm25_country = avg_pm25),
     by = "country"
   )
 
@@ -182,7 +168,7 @@ selected_shapes <- world_shapes %>%
 
 
 # ============================================================
-# 8. Define UI
+# 7. Define UI
 # ============================================================
 
 ui <- fluidPage(
@@ -195,12 +181,15 @@ ui <- fluidPage(
       "1. Heatmap + Regression",
       br(),
       h4("Pollutant Structure Heatmap"),
-      p("This heatmap shows normalized pollutant levels across the top 3 highest and top 3 lowest PM2.5 countries."),
-      p("Click any heatmap cell to generate a PM2.5 relationship plot below."),
+      p("X-axis shows the six selected countries ranked by average PM2.5. Y-axis shows other pollutants."),
+      p("The heatmap uses log-normalized values within each pollutant to avoid scale dominance."),
+      p("Click any heatmap cell to update the PM2.5 relationship plot below."),
+      
       plotlyOutput("structure_heatmap", height = "560px"),
+      
       br(),
       h4("PM2.5 Relationship Plot"),
-      plotlyOutput("scatter_plot", height = "540px")
+      plotlyOutput("scatter_plot", height = "600px")
     ),
     
     tabPanel(
@@ -237,13 +226,13 @@ ui <- fluidPage(
 
 
 # ============================================================
-# 9. Define Server
+# 8. Define Server
 # ============================================================
 
 server <- function(input, output, session) {
   
   # ------------------------------------------------------------
-  # 9.1 Update country filter based on selected group
+  # 8.1 Update country selector based on selected group
   # ------------------------------------------------------------
   
   observeEvent(input$map_group, {
@@ -265,43 +254,46 @@ server <- function(input, output, session) {
   
   
   # ------------------------------------------------------------
-  # 9.2 Heatmap
+  # 8.2 Draw Heatmap
   # ------------------------------------------------------------
   
   output$structure_heatmap <- renderPlotly({
     
     plot_ly(
       data = heatmap_data,
-      x = ~country,
+      x = ~country_label,
       y = ~Pollutant,
-      z = ~scaled_value,
+      z = ~normalized_value,
       type = "heatmap",
       source = "heat_click",
+      
       colorscale = list(
-        c(0, "#f7fbff"),
-        c(0.25, "#c6dbef"),
-        c(0.50, "#6baed6"),
-        c(0.75, "#2171b5"),
-        c(1, "#08306b")
+        c(0, "#f7f7f7"),
+        c(0.25, "#d6e6f2"),
+        c(0.5, "#92c5de"),
+        c(0.75, "#4393c3"),
+        c(1, "#2166ac")
       ),
+      zmin = 0,
+      zmax = 1,
+      
       text = ~paste(
         "Country:", country,
         "<br>Group:", group,
-        "<br>Average PM2.5:", round(avg_pm25, 2),
+        "<br>Average PM2.5:", round(avg_pm25, 1),
         "<br>Pollutant:", Pollutant,
-        "<br>Raw average value:", round(raw_value, 2),
-        "<br>Normalized heatmap value:", round(scaled_value, 2)
+        "<br>Raw average value:", round(avg_value, 2),
+        "<br>Normalized value:", round(normalized_value, 2)
       ),
+      
       hoverinfo = "text",
       colorbar = list(title = "Normalized value")
     ) %>%
       layout(
-        title = "Normalized Pollutant Structure of High and Low PM2.5 Countries",
+        title = "Normalized Pollutant Structure by Country",
         xaxis = list(
-          title = "Country with Average PM2.5",
-          tickangle = -25,
-          tickvals = selected_countries$country,
-          ticktext = selected_countries$country_label
+          title = "Countries Ranked by PM2.5",
+          tickangle = -30
         ),
         yaxis = list(title = "Other Pollutants"),
         margin = list(l = 90, r = 40, b = 120, t = 80)
@@ -310,25 +302,37 @@ server <- function(input, output, session) {
   
   
   # ------------------------------------------------------------
-  # 9.3 Regression scatter plot triggered by heatmap click
+  # 8.3 Country-level Scatter Plot with Regression Lines
   # ------------------------------------------------------------
   
   output$scatter_plot <- renderPlotly({
     
     click <- event_data("plotly_click", source = "heat_click")
     
-    if (is.null(click)) {
-      selected_pollutant <- "PM10"
-      clicked_country <- selected_countries$country[1]
+    selected_pollutant <- if (is.null(click)) {
+      "PM10"
     } else {
-      clicked_country <- as.character(click$x)
-      selected_pollutant <- as.character(click$y)
+      as.character(click$y)
     }
     
-    scatter_data <- country_profile %>%
+    scatter_data <- air_clean %>%
       filter(
-        !is.na(`PM2.5`),
-        !is.na(.data[[selected_pollutant]])
+        country %in% selected_countries$country,
+        Pollutant %in% c("PM2.5", selected_pollutant)
+      ) %>%
+      group_by(country, Pollutant) %>%
+      summarise(
+        avg_value = mean(Value, na.rm = TRUE),
+        .groups = "drop"
+      ) %>%
+      pivot_wider(
+        names_from = Pollutant,
+        values_from = avg_value
+      ) %>%
+      drop_na() %>%
+      left_join(
+        selected_countries %>% select(country, group),
+        by = "country"
       )
     
     validate(
@@ -341,6 +345,11 @@ server <- function(input, output, session) {
       use = "complete.obs"
     )
     
+    lm_model <- lm(scatter_data[[selected_pollutant]] ~ scatter_data$`PM2.5`)
+    r_squared <- summary(lm_model)$r.squared
+    
+    mean_pm25 <- mean(scatter_data$`PM2.5`, na.rm = TRUE)
+    
     p <- ggplot(
       scatter_data,
       aes(
@@ -350,32 +359,47 @@ server <- function(input, output, session) {
         text = paste(
           "Country:", country,
           "<br>Group:", group,
-          "<br>PM2.5:", round(`PM2.5`, 2),
-          paste0("<br>", selected_pollutant, ": "), round(.data[[selected_pollutant]], 2)
+          "<br>Average PM2.5:", round(`PM2.5`, 2),
+          paste0("<br>Average ", selected_pollutant, ": "),
+          round(.data[[selected_pollutant]], 2)
         )
       )
     ) +
-      geom_point(size = 4, alpha = 0.8) +
+      geom_point(size = 5, alpha = 0.85) +
       geom_smooth(
         aes(group = 1),
         method = "lm",
-        se = TRUE,
-        color = "#f28e2b",
-        linewidth = 1.3
+        se = FALSE,
+        color = "#E67E22",
+        linewidth = 1.4
       ) +
-      geom_point(
-        data = scatter_data %>% filter(country == clicked_country),
-        aes(x = `PM2.5`, y = .data[[selected_pollutant]]),
-        inherit.aes = FALSE,
-        size = 6,
-        shape = 21,
-        fill = "yellow",
+      geom_smooth(
+        aes(group = 1),
+        method = "loess",
+        se = FALSE,
+        color = "#2C7FB8",
+        linewidth = 1.2,
+        linetype = "dashed"
+      ) +
+      geom_vline(
+        xintercept = mean_pm25,
+        linetype = "dotted",
         color = "black",
-        stroke = 1.2
+        linewidth = 0.8
+      ) +
+      scale_color_manual(
+        values = c(
+          "High PM2.5" = "#F8766D",
+          "Low PM2.5" = "#00BFC4"
+        )
       ) +
       labs(
-        title = paste0("Country-level Relationship between PM2.5 and ", selected_pollutant),
-        subtitle = paste0("Six selected countries | Correlation = ", round(cor_value, 3)),
+        title = paste0("PM2.5 vs ", selected_pollutant, " across Six Selected Countries"),
+        subtitle = paste0(
+          "Correlation = ", round(cor_value, 3),
+          " | Linear R² = ", round(r_squared, 3),
+          " | Dotted line = mean PM2.5"
+        ),
         x = "Average PM2.5",
         y = paste0("Average ", selected_pollutant),
         color = "Country group"
@@ -387,7 +411,7 @@ server <- function(input, output, session) {
   
   
   # ------------------------------------------------------------
-  # 9.4 World map with country polygons and hidden monitoring sites
+  # 8.4 Draw World Map
   # ------------------------------------------------------------
   
   output$pm25_map <- renderLeaflet({
@@ -487,7 +511,7 @@ server <- function(input, output, session) {
 
 
 # ============================================================
-# 10. Run App
+# 9. Run App
 # ============================================================
 
 shinyApp(ui, server)
