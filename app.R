@@ -136,20 +136,29 @@ heatmap_data <- air_clean %>%
 # 6. Prepare World Map Data
 # ============================================================
 
-map_points <- air_clean %>%
-  filter(
-    country %in% selected_countries$country,
-    Pollutant == "PM2.5"
-  ) %>%
-  group_by(country, Location, lat, lon) %>%
+all_country_pm25 <- air_clean %>%
+  filter(Pollutant == "PM2.5") %>%
+  group_by(country) %>%
   summarise(
     avg_pm25 = mean(Value, na.rm = TRUE),
     n_obs = n(),
     .groups = "drop"
   ) %>%
+  filter(n_obs >= 5)
+
+all_map_points <- air_clean %>%
+  filter(Pollutant == "PM2.5") %>%
+  group_by(country, Location, lat, lon) %>%
+  summarise(
+    avg_pm25 = mean(Value, na.rm = TRUE),
+    n_obs = n(),
+    .groups = "drop"
+  )
+
+selected_map_points <- all_map_points %>%
+  filter(country %in% selected_countries$country) %>%
   left_join(
-    selected_countries %>%
-      select(country, group, avg_pm25_country = avg_pm25),
+    selected_countries %>% select(country, group),
     by = "country"
   )
 
@@ -158,8 +167,13 @@ world_shapes <- rnaturalearth::ne_countries(
   returnclass = "sf"
 )
 
+all_country_shapes <- world_shapes %>%
+  left_join(
+    all_country_pm25,
+    by = c("admin" = "country")
+  )
+
 selected_shapes <- world_shapes %>%
-  filter(admin %in% selected_countries$country | name %in% selected_countries$country) %>%
   left_join(
     selected_countries,
     by = c("admin" = "country")
@@ -184,9 +198,7 @@ ui <- fluidPage(
       p("X-axis shows the six selected countries ranked by average PM2.5. Y-axis shows other pollutants."),
       p("The heatmap uses log-normalized values within each pollutant to avoid scale dominance."),
       p("Click any heatmap cell to update the PM2.5 relationship plot below."),
-      
       plotlyOutput("structure_heatmap", height = "560px"),
-      
       br(),
       h4("PM2.5 Relationship Plot"),
       plotlyOutput("scatter_plot", height = "600px")
@@ -195,8 +207,8 @@ ui <- fluidPage(
     tabPanel(
       "2. World Map",
       br(),
-      h4("World Map of Selected PM2.5 Countries"),
-      p("Country polygons show national average PM2.5. Monitoring sites are hidden by default and can be turned on from the layer control."),
+      h4("World Map of PM2.5 Distribution"),
+      p("All countries with PM2.5 data are colored by average PM2.5. The selected six countries are highlighted with stronger borders."),
       
       fluidRow(
         column(
@@ -266,7 +278,6 @@ server <- function(input, output, session) {
       z = ~normalized_value,
       type = "heatmap",
       source = "heat_click",
-      
       colorscale = list(
         c(0, "#f7f7f7"),
         c(0.25, "#d6e6f2"),
@@ -276,7 +287,6 @@ server <- function(input, output, session) {
       ),
       zmin = 0,
       zmax = 1,
-      
       text = ~paste(
         "Country:", country,
         "<br>Group:", group,
@@ -285,7 +295,6 @@ server <- function(input, output, session) {
         "<br>Raw average value:", round(avg_value, 2),
         "<br>Normalized value:", round(normalized_value, 2)
       ),
-      
       hoverinfo = "text",
       colorbar = list(title = "Normalized value")
     ) %>%
@@ -302,7 +311,7 @@ server <- function(input, output, session) {
   
   
   # ------------------------------------------------------------
-  # 8.3 Country-level Scatter Plot with Regression Lines
+  # 8.3 Draw Country-Level Regression Plot
   # ------------------------------------------------------------
   
   output$scatter_plot <- renderPlotly({
@@ -347,7 +356,6 @@ server <- function(input, output, session) {
     
     lm_model <- lm(scatter_data[[selected_pollutant]] ~ scatter_data$`PM2.5`)
     r_squared <- summary(lm_model)$r.squared
-    
     mean_pm25 <- mean(scatter_data$`PM2.5`, na.rm = TRUE)
     
     p <- ggplot(
@@ -416,65 +424,106 @@ server <- function(input, output, session) {
   
   output$pm25_map <- renderLeaflet({
     
-    filtered_shapes <- selected_shapes %>%
+    # Filter selected six countries by group
+    filtered_selected_shapes <- selected_shapes %>%
       filter(
         input$map_group == "All selected countries" |
           group == input$map_group
       )
     
-    filtered_points <- map_points %>%
-      filter(
-        input$map_group == "All selected countries" |
-          group == input$map_group
-      )
+    # Default view: all global monitoring sites
+    if (input$map_group == "All selected countries" &&
+        input$map_country == "All countries") {
+      
+      filtered_points <- all_map_points %>%
+        mutate(group = "All dataset countries")
+      
+    } else {
+      
+      filtered_points <- selected_map_points %>%
+        filter(
+          input$map_group == "All selected countries" |
+            group == input$map_group
+        )
+    }
     
+    # If one country is selected, keep only that country's shape and points
     if (input$map_country != "All countries") {
-      filtered_shapes <- filtered_shapes %>%
+      
+      filtered_selected_shapes <- selected_shapes %>%
         filter(admin == input$map_country | name == input$map_country)
       
-      filtered_points <- filtered_points %>%
+      filtered_points <- selected_map_points %>%
         filter(country == input$map_country)
     }
     
-    validate(
-      need(nrow(filtered_shapes) > 0, "No country polygon data for this selection."),
-      need(nrow(filtered_points) > 0, "No monitoring-site data for this selection.")
-    )
-    
-    pal_country <- colorNumeric(
+    # Palette for all countries
+    pal_all <- colorNumeric(
       palette = "YlOrRd",
-      domain = selected_countries$avg_pm25
+      domain = all_country_pm25$avg_pm25,
+      na.color = "#F2F2F2",
+      reverse = FALSE
     )
     
-    leaflet() %>%
-      addProviderTiles(providers$CartoDB.Positron) %>%
+    # Palette for selected countries
+    pal_selected <- colorNumeric(
+      palette = "YlOrRd",
+      domain = all_country_pm25$avg_pm25,
+      na.color = "#F2F2F2",
+      reverse = FALSE
+    )
+    
+    # Create base map
+    m <- leaflet() %>%
+      addProviderTiles(
+        providers$CartoDB.Positron,
+        options = providerTileOptions(noWrap = TRUE)
+      ) %>%
       
+      # Layer 1: all countries with PM2.5 data
       addPolygons(
-        data = filtered_shapes,
-        fillColor = ~pal_country(avg_pm25),
-        fillOpacity = 0.35,
-        color = "#4A90E2",
-        weight = 1.2,
-        opacity = 0.9,
-        group = "Country PM2.5 area",
+        data = all_country_shapes %>% filter(!is.na(avg_pm25)),
+        fillColor = ~pal_all(avg_pm25),
+        fillOpacity = 0.45,
+        color = "#D0D0D0",
+        weight = 0.5,
+        opacity = 0.7,
+        group = "All PM2.5 countries",
         popup = ~paste0(
           "<b>", admin, "</b><br>",
-          "Group: ", group, "<br>",
-          "Country average PM2.5: ", round(avg_pm25, 2), "<br>",
+          "Dataset country average PM2.5: ", round(avg_pm25, 2), "<br>",
           "Observations: ", n_obs
         )
       ) %>%
       
+      # Layer 2: selected six countries
+      addPolygons(
+        data = filtered_selected_shapes,
+        fillColor = ~pal_selected(avg_pm25),
+        fillOpacity = 0.78,
+        color = "#2C7FB8",
+        weight = 2.4,
+        opacity = 1,
+        group = "Selected six countries",
+        popup = ~paste0(
+          "<b>", admin, "</b><br>",
+          "Group: ", group, "<br>",
+          "Selected country average PM2.5: ", round(avg_pm25, 2), "<br>",
+          "Observations: ", n_obs
+        )
+      ) %>%
+      
+      # Monitoring sites
       addCircleMarkers(
         data = filtered_points,
         lng = ~lon,
         lat = ~lat,
-        radius = 3.5,
-        fillColor = "#4A4A4A",
-        fillOpacity = 0.55,
-        color = "#222222",
-        opacity = 0.75,
-        weight = 0.4,
+        radius = 2.6,
+        fillColor = "#333333",
+        fillOpacity = 0.45,
+        color = "#111111",
+        opacity = 0.6,
+        weight = 0.25,
         group = "Monitoring sites",
         popup = ~paste0(
           "<b>", Location, "</b><br>",
@@ -483,29 +532,61 @@ server <- function(input, output, session) {
           "Monitoring-site PM2.5: ", round(avg_pm25, 2), "<br>",
           "Observations: ", n_obs
         ),
-        label = ~paste0(Location, " | PM2.5=", round(avg_pm25, 1))
+        label = ~paste0(country, " | ", Location, " | PM2.5=", round(avg_pm25, 1))
       ) %>%
       
       addLegend(
-        pal = pal_country,
-        values = selected_countries$avg_pm25,
+        pal = pal_all,
+        values = all_country_pm25$avg_pm25,
         title = "Country Avg PM2.5",
-        opacity = 0.8
+        opacity = 0.8,
+        position = "bottomright"
       ) %>%
       
       addLayersControl(
-        overlayGroups = c("Country PM2.5 area", "Monitoring sites"),
+        overlayGroups = c(
+          "All PM2.5 countries",
+          "Selected six countries",
+          "Monitoring sites"
+        ),
         options = layersControlOptions(collapsed = FALSE)
       ) %>%
       
       hideGroup("Monitoring sites") %>%
       
-      fitBounds(
-        lng1 = min(filtered_points$lon, na.rm = TRUE),
-        lat1 = min(filtered_points$lat, na.rm = TRUE),
-        lng2 = max(filtered_points$lon, na.rm = TRUE),
-        lat2 = max(filtered_points$lat, na.rm = TRUE)
+      setMaxBounds(
+        lng1 = -180, lat1 = -60,
+        lng2 = 180,  lat2 = 85
       )
+    
+    # Zoom logic
+    if (input$map_country != "All countries" && nrow(filtered_selected_shapes) > 0) {
+      
+      bbox <- tryCatch(
+        sf::st_bbox(filtered_selected_shapes),
+        error = function(e) NULL
+      )
+      
+      if (!is.null(bbox) && all(is.finite(bbox))) {
+        m <- m %>%
+          fitBounds(
+            lng1 = as.numeric(bbox["xmin"]),
+            lat1 = as.numeric(bbox["ymin"]),
+            lng2 = as.numeric(bbox["xmax"]),
+            lat2 = as.numeric(bbox["ymax"])
+          )
+      } else {
+        m <- m %>%
+          setView(lng = 20, lat = 20, zoom = 2)
+      }
+      
+    } else {
+      
+      m <- m %>%
+        setView(lng = 20, lat = 20, zoom = 2)
+    }
+    
+    m
   })
 }
 
