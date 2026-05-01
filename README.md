@@ -17,19 +17,22 @@ This project develops an interactive Shiny application to explore
 characteristics of key pollutants, identify the three countries with the
 **highest PM2.5 concentrations** and the three countries with the
 **lowest PM2.5 concentrations**, create individual **heatmaps** for
-these two groups, explore the **correlation between PM2.5 and other
-pollutants** , and finally reveal the **factors that cause PM2.5
-concentration differences**.
+these two groups(global pollution and 6 countries PM2.5 VS their other
+pollutions), explore the **correlation between PM2.5 and other
+pollutants** , comparing the **GPA** among all countries, and finally
+reveal the **factors that cause PM2.5 concentration differences**.
 
 ### Research Question
 
-> What cause PM2.5?
+> What is the correlation between PM2.5 and other pollutions?
+>
+> GDA causes PM2.5?
 
 ## 2. Dataset Description
 
 ### 2.1 Background
 
--   Dataset: World Air Quality Data 2024 (Updated)
+-   Dataset1: World Air Quality Data 2024 (Updated)
 
 -   Source: [World Air Quality Data 2024
     (Updated)](https://www.kaggle.com/datasets/kanchana1990/world-air-quality-data-2024-updated/data)
@@ -44,7 +47,7 @@ concentration differences**.
     -   Number of observations: **54255**
     -   Number of variables: **10**
     -   Key variables:
-    -   country code,
+    -   country code
     -   city
     -   Latitude
     -   Longitude
@@ -56,6 +59,28 @@ concentration differences**.
     -   Last Updated
     -   Country Label
     -   AQI (Air Quality Index)
+
+-   Dataset2: World Bank GDP Ranking Dataset 2024
+
+-   Source:
+    <https://www.kaggle.com/datasets/mdmahfuzsumon/world-bank-gdp-ranking-dataset-2024>
+
+-   Description: This dataset provides comprehensive 2024 gross domestic
+    product (GDP) rankings and economic indicators for countries and
+    economies worldwide, sourced directly from the World Bank's official
+    World Development Indicators. enabling cross-country economic
+    comparisons at market exchange rates and adjusted for cost of living
+    differences.
+
+-   Structure:
+
+    -   Number of observations: **217**
+    -   Number of variables: **3**
+    -   Key variables:
+    -   Ranking
+    -   Economy
+    -   Country
+    -   GDP (millions of US dollars)
 
 ### 2.2 Data Collection
 
@@ -88,11 +113,10 @@ research.
 The following preprocessing steps were performed:
 
 -   Removed missing or incomplete records where necessary
+-   Delete the observation points that are less than three
 -   Checked for invalid or unrealistic values
 -   Converted variables into appropriate formats (numeric / categorical)
 -   Selected relevant variables for analysis and visualization
--   [这里补：是否做了标准化 / 分组 / 新变量构造，比如 high vs low study
-    hours]
 
 These steps ensured that the dataset is clean, consistent, and suitable
 for analysis.
