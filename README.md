@@ -50,7 +50,7 @@ The GitHub repository is available here:
 
 ### 2.3 Run the App from GitHub in RStudio Console
 
-If users want to run the app locally from GitHub, they can copy and run the following code in the RStudio Console:(要改)
+If users want to run the app locally from GitHub, they can copy and run the following code in the RStudio Console:(要改明天再跑一下)
 
 ``` r
 shiny::runGitHub(
@@ -408,7 +408,7 @@ The project workflow can be summarized as follows:
 ## 12. Team Contributions
 
 | Member | Responsibility |
-|----|----|
+|------------------------------------|------------------------------------|
 | ZHANG, Chuxi | Project Lead: Overall coordination, conceptualization, UI design strategy, README development inspiration for the image and music modules, and final integration. |
 | HE, Bingyi | Data cleaning, PM2.5 analysis, map/radar/final page design, README development, Fix UI and teammate code bugs. |
 | LIN, Zirong | Heatmap and correlation analysis |
