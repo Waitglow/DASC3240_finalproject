@@ -32,55 +32,54 @@ reveal the **factors that cause PM2.5 concentration differences**.
 
 ### 2.1 Background
 
--   Dataset1: World Air Quality Data 2024 (Updated)
+- Dataset1: World Air Quality Data 2024 (Updated)
 
--   Source: [World Air Quality Data 2024
-    (Updated)](https://www.kaggle.com/datasets/kanchana1990/world-air-quality-data-2024-updated/data)
+- Source: [World Air Quality Data 2024
+  (Updated)](https://www.kaggle.com/datasets/kanchana1990/world-air-quality-data-2024-updated/data)
 
--   Description: This dataset provides up-to-date air quality
-    measurements from monitoring stations around the world, including
-    major pollutants, air quality index (AQI), geographic information,
-    and time records.
+- Description: This dataset provides up-to-date air quality measurements
+  from monitoring stations around the world, including major pollutants,
+  air quality index (AQI), geographic information, and time records.
 
--   Structure:
+- Structure:
 
-    -   Number of observations: **54255**
-    -   Number of variables: **10**
-    -   Key variables:
-    -   country code
-    -   city
-    -   Latitude
-    -   Longitude
-    -   Location
-    -   Pollutant
-    -   Source Name
-    -   Unit
-    -   Value
-    -   Last Updated
-    -   Country Label
-    -   AQI (Air Quality Index)
+  - Number of observations: **54255**
+  - Number of variables: **10**
+  - Key variables:
+  - country code
+  - city
+  - Latitude
+  - Longitude
+  - Location
+  - Pollutant
+  - Source Name
+  - Unit
+  - Value
+  - Last Updated
+  - Country Label
+  - AQI (Air Quality Index)
 
--   Dataset2: World Bank GDP Ranking Dataset 2024
+- Dataset2: World Bank GDP Ranking Dataset 2024
 
--   Source:
-    <https://www.kaggle.com/datasets/mdmahfuzsumon/world-bank-gdp-ranking-dataset-2024>
+- Source:
+  <https://www.kaggle.com/datasets/mdmahfuzsumon/world-bank-gdp-ranking-dataset-2024>
 
--   Description: This dataset provides comprehensive 2024 gross domestic
-    product (GDP) rankings and economic indicators for countries and
-    economies worldwide, sourced directly from the World Bank's official
-    World Development Indicators. enabling cross-country economic
-    comparisons at market exchange rates and adjusted for cost of living
-    differences.
+- Description: This dataset provides comprehensive 2024 gross domestic
+  product (GDP) rankings and economic indicators for countries and
+  economies worldwide, sourced directly from the World Bank's official
+  World Development Indicators. enabling cross-country economic
+  comparisons at market exchange rates and adjusted for cost of living
+  differences.
 
--   Structure:
+- Structure:
 
-    -   Number of observations: **217**
-    -   Number of variables: **3**
-    -   Key variables:
-    -   Ranking
-    -   Economy
-    -   Country
-    -   GDP (millions of US dollars)
+  - Number of observations: **217**
+  - Number of variables: **3**
+  - Key variables:
+  - Ranking
+  - Economy
+  - Country
+  - GDP (millions of US dollars)
 
 ### 2.2 Data Collection
 
@@ -93,18 +92,18 @@ research.
 
 ### 2.3 License
 
--   Source platform: Kaggle
+- Source platform: Kaggle
 
--   License type: CC BY 4.0
+- License type: CC BY 4.0
 
--   Usage: The dataset can be freely used, modified, and distributed for
-    academic and research purposes.
+- Usage: The dataset can be freely used, modified, and distributed for
+  academic and research purposes.
 
--   Attribution: Proper acknowledgment should be given to the original
-    dataset provider on Kaggle.
+- Attribution: Proper acknowledgment should be given to the original
+  dataset provider on Kaggle.
 
--   Restrictions: The dataset is provided "as is" without warranty, and
-    users should comply with the terms of the CC BY 4.0
+- Restrictions: The dataset is provided "as is" without warranty, and
+  users should comply with the terms of the CC BY 4.0
 
 ------------------------------------------------------------------------
 
@@ -112,11 +111,11 @@ research.
 
 The following preprocessing steps were performed:
 
--   Removed missing or incomplete records where necessary
--   Delete the observation points that are less than three
--   Checked for invalid or unrealistic values
--   Converted variables into appropriate formats (numeric / categorical)
--   Selected relevant variables for analysis and visualization
+- Removed missing or incomplete records where necessary
+- Delete the observation points that are less than three
+- Checked for invalid or unrealistic values
+- Converted variables into appropriate formats (numeric / categorical)
+- Selected relevant variables for analysis and visualization
 
 These steps ensured that the dataset is clean, consistent, and suitable
 for analysis.
@@ -138,11 +137,11 @@ The application follows a structured analytical flow:
 
 ### 4.2 Key Insights
 
--   Students who consistently spend more time studying tend to achieve
-    higher exam scores
--   Attendance is positively correlated with academic performance
--   Lifestyle factors such as insufficient sleep and excessive social
-    media usage may negatively affect exam results
+- Students who consistently spend more time studying tend to achieve
+  higher exam scores
+- Attendance is positively correlated with academic performance
+- Lifestyle factors such as insufficient sleep and excessive social
+  media usage may negatively affect exam results
 
 ------------------------------------------------------------------------
 
@@ -157,10 +156,10 @@ The application follows a structured analytical flow:
 
 ## 5. Visualization Design(例子到时候还得改我们用啥可视化了)
 
--   Clear titles, axis labels, and units are provided
--   Consistent and readable color schemes are used
--   No misleading visual representations are included
--   Visualizations are designed for clarity and interpretability
+- Clear titles, axis labels, and units are provided
+- Consistent and readable color schemes are used
+- No misleading visual representations are included
+- Visualizations are designed for clarity and interpretability
 
 ------------------------------------------------------------------------
 
@@ -168,9 +167,9 @@ The application follows a structured analytical flow:
 
 ### Features
 
--   Interactive filtering (e.g., by study hours or demographic groups)
--   Hover tooltips for detailed inspection
--   Zoom functionality for focused exploration
+- Interactive filtering (e.g., by study hours or demographic groups)
+- Hover tooltips for detailed inspection
+- Zoom functionality for focused exploration
 
 ### Justification
 
@@ -181,10 +180,10 @@ flexibility - Understanding of relationships across subgroups
 
 ## 7. Code Quality and Reproducibility
 
--   The application runs without errors
--   Code is modular and well-structured
--   Clear variable naming and comments are provided
--   The project is reproducible with the included instructions
+- The application runs without errors
+- Code is modular and well-structured
+- Clear variable naming and comments are provided
+- The project is reproducible with the included instructions
 
 ------------------------------------------------------------------------
 
@@ -192,16 +191,16 @@ flexibility - Understanding of relationships across subgroups
 
 ### 📁 Description
 
--   **app.R** Contains the main Shiny application, including both UI and
-    server logic.
+- **app.R** Contains the main Shiny application, including both UI and
+  server logic.
 
--   **data** Stores the dataset used for analysis.
+- **data** Stores the dataset used for analysis.
 
--   **README.md & LICENSE** Provide project documentation and licensing
-    information.
+- **README.md & LICENSE** Provide project documentation and licensing
+  information.
 
--   **.gitignore** Ensures unnecessary files are excluded from version
-    control.
+- **.gitignore** Ensures unnecessary files are excluded from version
+  control.
 
 ------------------------------------------------------------------------
 
