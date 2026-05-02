@@ -1,66 +1,92 @@
+---
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
 # DASC3240_finalproject
 
-## 🧠 Academic Performance Analysis: The Impact of Study Habits on Exam Scores
+## 🌍 Global Air Quality Analysis 2024: Pollutants and PM2.5
 
 ------------------------------------------------------------------------
 
-## 1. Project Overview(改 等做完的改)
+## 1. Project Overview
 
-This project develops an **interactive Shiny application** to explore and explain how students’ study habits affect their academic performance.
-
-Rather than only visualizing the data, the application is designed to provide **clear storytelling and meaningful insights**, helping users understand key factors influencing exam scores.
+This project develops an interactive Shiny application to explore
+**global air quality** patterns in 2024, analyze the distribution
+characteristics of key pollutants, identify the three countries with the
+**highest PM2.5 concentrations** and the three countries with the
+**lowest PM2.5 concentrations**, create individual **heatmaps** for
+these two groups(global pollution and 6 countries PM2.5 VS their other
+pollutions), explore the **correlation between PM2.5 and other
+pollutants** , comparing the **GPA** among all countries, and finally
+reveal the **factors that cause PM2.5 concentration differences**.
 
 ### Research Question
 
-> How do study habits and lifestyle factors influence students’ exam performance?
-
-------------------------------------------------------------------------
+> What is the correlation between PM2.5 and other pollutions?
+>
+> GDA causes PM2.5?
 
 ## 2. Dataset Description
 
 ### 2.1 Background
 
-- Dataset: Student Exam Scores and Study Habits Dataset
+- Dataset1: World Air Quality Data 2024 (Updated)
 
-- Source: <https://www.kaggle.com/datasets/robiulhasanjisan/student-exam-scores-and-study-habits-dataset>
+- Source: [World Air Quality Data 2024
+  (Updated)](https://www.kaggle.com/datasets/kanchana1990/world-air-quality-data-2024-updated/data)
 
-- Description: This dataset contains information on students’ academic performance along with various behavioral and lifestyle factors, such as study hours, attendance, sleep patterns, and social habits.
+- Description: This dataset provides up-to-date air quality measurements
+  from monitoring stations around the world, including major pollutants,
+  air quality index (AQI), geographic information, and time records.
 
 - Structure:
 
-  - Number of observations: **6,607**
+  - Number of observations: **54255**
+  - Number of variables: **10**
+  - Key variables:
+  - country code
+  - city
+  - Latitude
+  - Longitude
+  - Location
+  - Pollutant
+  - Source Name
+  - Unit
+  - Value
+  - Last Updated
+  - Country Label
+  - AQI (Air Quality Index)
 
-  - Number of variables: **11**
+- Dataset2: World Bank GDP Ranking Dataset 2024
 
-  - Key variables:(我感觉把我们用的 写出来 我把variables + units全写了)
+- Source:
+  <https://www.kaggle.com/datasets/mdmahfuzsumon/world-bank-gdp-ranking-dataset-2024>
 
-  - Final_Exam_Score (Final exam score)
+- Description: This dataset provides comprehensive 2024 gross domestic
+  product (GDP) rankings and economic indicators for countries and
+  economies worldwide, sourced directly from the World Bank's official
+  World Development Indicators. enabling cross-country economic
+  comparisons at market exchange rates and adjusted for cost of living
+  differences.
 
-  - Hours_Studied (Study hours per week)
+- Structure:
 
-  - Attendance (Class attendance rate, %)
-
-  - Sleep_Hours (Average sleep hours per night)
-
-  - Previous_Scores (Previous exam scores)
-
-  - Tutoring_Sessions (Number of tutoring sessions attended)
-
-  - Parental_Involvement (Level of parental involvement: Low / Medium / High)
-
-  - Access_to_Resources (Availability of learning resources: Low / Medium / High)
-
-  - Extracurricular_Activities (Participation in extracurricular activities: Yes / No)
-
-  - Motivation_Level (Level of learning motivation: Low / Medium / High)
-
-  - 
-
-    ## Internet_Access (Access to internet: Yes / No)
+  - Number of observations: **217**
+  - Number of variables: **3**
+  - Key variables:
+  - Ranking
+  - Economy
+  - Country
+  - GDP (millions of US dollars)
 
 ### 2.2 Data Collection
 
-The dataset is publicly available on Kaggle and represents typical student study behaviors and performance outcomes. It is suitable for educational analysis and visualization purposes.
+Data is aggregated from global public monitoring networks and official
+environmental agencies, standardized for cross‑country comparison.
+Suitable for environmental analysis, mapping, and public health
+research.
 
 ------------------------------------------------------------------------
 
@@ -68,13 +94,16 @@ The dataset is publicly available on Kaggle and represents typical student study
 
 - Source platform: Kaggle
 
-- License type: MIT License
+- License type: CC BY 4.0
 
-- Usage: The dataset can be freely used, modified, and distributed for academic and research purposes.
+- Usage: The dataset can be freely used, modified, and distributed for
+  academic and research purposes.
 
-- Attribution: Proper acknowledgment should be given to the original dataset provider on Kaggle.
+- Attribution: Proper acknowledgment should be given to the original
+  dataset provider on Kaggle.
 
-- Restrictions: The dataset is provided "as is" without warranty, and users should comply with the terms of the MIT License.
+- Restrictions: The dataset is provided "as is" without warranty, and
+  users should comply with the terms of the CC BY 4.0
 
 ------------------------------------------------------------------------
 
@@ -83,12 +112,13 @@ The dataset is publicly available on Kaggle and represents typical student study
 The following preprocessing steps were performed:
 
 - Removed missing or incomplete records where necessary
+- Delete the observation points that are less than three
 - Checked for invalid or unrealistic values
 - Converted variables into appropriate formats (numeric / categorical)
 - Selected relevant variables for analysis and visualization
-- [这里补：是否做了标准化 / 分组 / 新变量构造，比如 high vs low study hours]
 
-These steps ensured that the dataset is clean, consistent, and suitable for analysis.
+These steps ensured that the dataset is clean, consistent, and suitable
+for analysis.
 
 ------------------------------------------------------------------------
 
@@ -107,15 +137,20 @@ The application follows a structured analytical flow:
 
 ### 4.2 Key Insights
 
-- Students who consistently spend more time studying tend to achieve higher exam scores
+- Students who consistently spend more time studying tend to achieve
+  higher exam scores
 - Attendance is positively correlated with academic performance
-- Lifestyle factors such as insufficient sleep and excessive social media usage may negatively affect exam results
+- Lifestyle factors such as insufficient sleep and excessive social
+  media usage may negatively affect exam results
 
 ------------------------------------------------------------------------
 
 ### So What?
 
-> These findings suggest that academic performance is not solely determined by study time, but also influenced by broader lifestyle habits. Maintaining consistent study routines and healthy daily behaviors can significantly improve academic outcomes.
+> These findings suggest that academic performance is not solely
+> determined by study time, but also influenced by broader lifestyle
+> habits. Maintaining consistent study routines and healthy daily
+> behaviors can significantly improve academic outcomes.
 
 ------------------------------------------------------------------------
 
@@ -138,7 +173,8 @@ The application follows a structured analytical flow:
 
 ### Justification
 
-Interactivity enhances: - User engagement - Data exploration flexibility - Understanding of relationships across subgroups
+Interactivity enhances: - User engagement - Data exploration
+flexibility - Understanding of relationships across subgroups
 
 ------------------------------------------------------------------------
 
@@ -155,19 +191,16 @@ Interactivity enhances: - User engagement - Data exploration flexibility - Under
 
 ### 📁 Description
 
-- **app.R** Contains the main Shiny application, including both UI and server logic.
-
-- **about.md(L20说的我不确定fianl project需要不)** Provides background information about the dataset and project context.
-
-- **insight.md(L20说的我不确定fianl project需要不)** Summarizes key insights and interpretations derived from the analysis.
+- **app.R** Contains the main Shiny application, including both UI and
+  server logic.
 
 - **data** Stores the dataset used for analysis.
 
-- **test.Rmd** *(optional目前我测试的 代码 我不确定老师 啥要求 文件)* Used for exploratory analysis and testing during development.
+- **README.md & LICENSE** Provide project documentation and licensing
+  information.
 
-- **README.md & LICENSE** Provide project documentation and licensing information.
-
-- **.gitignore** Ensures unnecessary files are excluded from version control.
+- **.gitignore** Ensures unnecessary files are excluded from version
+  control.
 
 ------------------------------------------------------------------------
 
@@ -181,7 +214,9 @@ Interactivity enhances: - User engagement - Data exploration flexibility - Under
 | YANG, Taoming   | eg: Data preprocessing and cleaning(自己改)          |
 | CHENG, Wing Him | eg: Documentation and reporting(自己改)              |
 
-All members contributed through GitHub using a structured version control workflow, including branch-based development and regular commits.
+All members contributed through GitHub using a structured version
+control workflow, including branch-based development and regular
+commits.
 
 ------------------------------------------------------------------------
 
@@ -214,8 +249,14 @@ The workflow of this project can be summarized as follows:
 
 ## 11. AI Declaration(需要改最后完事的)
 
-Generative AI tools (e.g., [MODEL NAME, e.g., ChatGPT (OpenAI GPT-5)]自己写用了啥模型) were used in this project for limited assistance, including: - 自己写干了啥 - 自己写干了啥 - 自己写干了啥
+Generative AI tools (e.g., [MODEL NAME, e.g., ChatGPT (OpenAI
+GPT-5)]自己写用了啥模型) were used in this project for limited
+assistance, including: - 自己写干了啥 - 自己写干了啥 - 自己写干了啥
 
-All core academic work, including dataset selection, data cleaning, data analysis, visualization design, interpretation of results, and Shiny application development, was completed by the group members.
+All core academic work, including dataset selection, data cleaning, data
+analysis, visualization design, interpretation of results, and Shiny
+application development, was completed by the group members.
 
-All AI-assisted outputs were carefully reviewed, edited, and validated. The group takes full responsibility for the originality, accuracy, and academic integrity of the final submission.
+All AI-assisted outputs were carefully reviewed, edited, and validated.
+The group takes full responsibility for the originality, accuracy, and
+academic integrity of the final submission.
