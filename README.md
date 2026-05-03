@@ -391,9 +391,6 @@ DASC3240_finalproject/
 - **README.md**\
   Provides project documentation, dataset description, running instructions, and team contribution information.
 
-- **.rscignore(不确定)**\
-  Excludes unnecessary files, such as `docs/`, from shinyapps.io deployment.
-
 ------------------------------------------------------------------------
 
 ## 11. Workflow Diagram
