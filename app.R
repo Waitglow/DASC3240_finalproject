@@ -4439,7 +4439,7 @@ server <- function(input, output, session) {
       )
     )
   })
-  
+  # Check if the program ran successfully.
   print("App running successfully")
 }
 
