@@ -42,6 +42,10 @@ The deployed Shiny app is available here:
 
 <https://havoc0101.shinyapps.io/3240finaltest/>
 
+and *(If the backup amount is insufficient)*
+
+<https://waitglow.shinyapps.io/DASC3240_finalproject/>
+
 ### 2.2 GitHub Repository
 
 The GitHub repository is available here:
@@ -50,13 +54,25 @@ The GitHub repository is available here:
 
 ### 2.3 Run the App from GitHub in RStudio Console
 
-If users want to run the app locally from GitHub, they can copy and run the following code in the RStudio Console:(要改明天再跑一下)
+If users want to run the app locally from GitHub, they can copy and run the following code in the RStudio Console:
 
 ``` r
 shiny::runGitHub(
   repo = "3240finaltest",
   username = "Havoc0101"
 )
+```
+
+and *(If the backup amount is insufficient)*
+
+```r
+
+shiny::runGitHub(
+  repo = "DASC3240_finalproject",
+  username = "Waitglow",
+  ref = "main"
+)
+
 ```
 
 ### 2.4 Run the App Locally from Downloaded Files
