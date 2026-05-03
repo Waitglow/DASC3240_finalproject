@@ -339,7 +339,6 @@ DASC3240_finalproject/
 ├── README.md
 ├── LICENSE
 ├── .gitignore
-├── .rscignore(可能没有)
 ├── data/
 │   ├── world_air_quality.csv
 │   └── GDP.csv
