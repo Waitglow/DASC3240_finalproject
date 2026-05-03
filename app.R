@@ -889,12 +889,16 @@ ui <- fluidPage(  # Create the full Shiny user interface page
     zh: '你是否听说过 PM2.5？PM2.5 是一种非常微小的空气颗粒物，它可以进入人体，并对健康造成危害。',
     ja: 'PM2.5 を聞いたことがありますか？PM2.5 は非常に小さな大気中の粒子で、人体に入り込み、健康に悪影響を与える可能性があります。'
   };
-
+// Store the current typing timer.
+// This allows us to stop the old typewriter animation when the user switches language.
   window.openingTypingTimer = null;
-
+// Main function for switching the opening-page language.
+// lang can be en,zh, or ja.
   function setOpeningLang(lang) {
 
     // Send selected language to Shiny server
+    // This tells the Shiny server which language the user selected.
+  // The server can then update the Markdown content and Start button label.
     if (window.Shiny) {
       Shiny.setInputValue('opening_lang_selected', lang, {priority: 'event'});
     }
@@ -904,10 +908,21 @@ ui <- fluidPage(  # Create the full Shiny user interface page
       btn.classList.remove('opening-lang-active');
     });
 
+// Add the active style only to the selected language button.
+  // Example: if lang =  zh, the selected button id is open_lang_zh.
+  
     const activeBtn = document.getElementById('open_lang_' + lang);
     if (activeBtn) {
       activeBtn.classList.add('opening-lang-active');
     }
+
+  // =========================
+  // 3. Get opening-page HTML elements
+  // =========================
+  // typewriter_text: where the animated text is typed.
+  // typewriter_cursor: the blinking cursor after the text.
+  // opening_typewriter: the container for the typewriter animation.
+  // opening_final: the final Markdown welcome message and Start button.
 
     const target = document.getElementById('typewriter_text');
     const cursor = document.getElementById('typewriter_cursor');
@@ -928,12 +943,24 @@ ui <- fluidPage(  # Create the full Shiny user interface page
     typewriterBox.style.transform = 'translateY(0)';
     finalBox.classList.remove('show-final');
 
+// Show the blinking cursor again.
     if (cursor) {
       cursor.style.display = 'inline-block';
     }
 
+  // =========================
+  // 6. Select the correct opening text
+   // =========================
+  // window.openingTexts should be defined earlier.
+  
     let text = window.openingTexts[lang];
     let index = 0;
+
+
+
+  // =========================
+  // 7. Typewriter animation function
+  // =========================
 
     function typeText() {
       if (index < text.length) {
