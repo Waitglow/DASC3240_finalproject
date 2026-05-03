@@ -1,5 +1,27 @@
-.Rproj.user
+# RStudio local files
 .Rhistory
 .RData
 .Ruserdata
-.positai
+.Rproj.user/
+
+# macOS
+.DS_Store
+
+# rsconnect deployment metadata
+rsconnect/
+
+# Shinylive export folder
+docs/
+
+# Local temporary files
+11.R
+12.R
+student_dataset.csv
+world_air_quality_clean_R.csv
+www/bm_test1.mp3
+
+# Local cleaned csv files
+*.tmp.csv
+*_clean.csv
+*_cleaned.csv
+*_clean_R.csv
